@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { getPostUrlBySlug } from "@utils/url-utils";
+import { getPostUrlBySlug, getSeriesUrl } from "@utils/url-utils";
+import { getSeriesFolderName, isSeriesEntry } from "@utils/series-utils";
 import PostCard from "@/components/layout/PostCard.astro";
 import { siteConfig } from "@/config";
 
@@ -35,25 +36,34 @@ const initialLayoutClass =
   style={`--post-card-min-width: ${columnWidth}px;`}
 >
   {
-    page.data.map((entry: PostEntry, index: number) => (
-      <PostCard
-        entry={entry}
-        title={entry.data.title}
-        tags={entry.data.tags}
-        category={entry.data.category}
-        published={entry.data.published}
-        updated={entry.data.updated}
-        url={getPostUrlBySlug(entry.id)}
-        image={entry.data.image}
-        description={entry.data.description}
-        draft={entry.data.draft}
-        pinned={entry.data.pinned}
-        password={!!entry.data.password}
-        loading={index < 2 ? "eager" : "lazy"}
-        class:list="onload-animation post-card-item"
-        style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms);`}
-      />
-    ))
+    page.data.map((entry: PostEntry, index: number) => {
+      const seriesFolder = isSeriesEntry(entry.id)
+        ? getSeriesFolderName(entry.id)
+        : "";
+      const postUrl = seriesFolder
+        ? getSeriesUrl(seriesFolder)
+        : getPostUrlBySlug(entry.id);
+
+      return (
+        <PostCard
+          entry={entry}
+          title={entry.data.title}
+          tags={entry.data.tags}
+          category={entry.data.category}
+          published={entry.data.published!}
+          updated={entry.data.updated}
+          url={postUrl}
+          image={entry.data.image}
+          description={entry.data.description}
+          draft={entry.data.draft}
+          pinned={entry.data.pinned}
+          password={!!entry.data.password}
+          loading={index < 2 ? "eager" : "lazy"}
+          class:list="onload-animation post-card-item"
+          style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms);`}
+        />
+      );
+    })
   }
 </div>
 

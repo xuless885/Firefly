@@ -309,6 +309,14 @@ enum I18nKey {
 	passwordSubmit = "passwordSubmit",
 	passwordError = "passwordError",
 	passwordProtectedRss = "passwordProtectedRss",
+
+	// 系列文档
+	seriesBadge = "seriesBadge",
+	seriesBackToHome = "seriesBackToHome",
+	seriesNoChapters = "seriesNoChapters",
+	seriesNoContent = "seriesNoContent",
+	seriesPrevChapter = "seriesPrevChapter",
+	seriesNextChapter = "seriesNextChapter",
 }
 
 export default I18nKey;

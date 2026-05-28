@@ -313,4 +313,12 @@ export const zh_CN: Translation = {
 	[Key.passwordSubmit]: "解锁",
 	[Key.passwordError]: "密码错误，请重试。",
 	[Key.passwordProtectedRss]: "本文已加密保护，请访问网站查看。",
+
+	// 系列文档
+	[Key.seriesBadge]: "系列",
+	[Key.seriesBackToHome]: "返回系列首页",
+	[Key.seriesNoChapters]: "暂无章节",
+	[Key.seriesNoContent]: "暂无可显示的章节内容",
+	[Key.seriesPrevChapter]: "上一章",
+	[Key.seriesNextChapter]: "下一章",
 };

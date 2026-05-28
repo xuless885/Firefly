@@ -1,0 +1,7 @@
+# DSE 课题讲义配置
+# 同步 Obsidian vault 中的章节文件到系列目录
+sync:
+  source: "C:/Users/xuless/OneDrive/Xuless Obsidian Note/HKDSE course/DSE 课题讲义"
+
+# 首页侧边栏默认高亮章节
+defaultChapter: "Chapter 0 基础概念"

@@ -8,7 +8,7 @@ export async function GET() {
 			id: post.id,
 			title: post.data.title,
 			description: post.data.description,
-			published: post.data.published.getTime(),
+			published: post.data.published!.getTime(),
 			category: post.data.category || "",
 			password: !!post.data.password,
 		}))

@@ -1,0 +1,83 @@
+---
+import { Icon } from "astro-icon/components";
+import {
+	getSeriesChapterUrl,
+	getSeriesUrl,
+} from "@/utils/url-utils";
+import type { ChapterInfo } from "@/utils/series-utils";
+
+interface Props {
+	seriesId: string;
+	chapters: ChapterInfo[];
+	currentChapter: string;
+}
+
+const { seriesId, chapters, currentChapter } = Astro.props;
+---
+
+<div class="series-sidebar card-base p-4 w-full">
+	<!-- 系列首页链接 -->
+	<a
+		href={getSeriesUrl(seriesId)}
+		class="flex items-center gap-2 mb-3 pb-3 border-b border-(--line-divider)
+		           text-sm font-medium text-black/60 dark:text-white/60
+		           hover:text-(--primary) dark:hover:text-(--primary) transition-colors"
+	>
+		<Icon
+			name="material-symbols:arrow-back-rounded"
+			class="text-base"
+		/>
+		<span>返回系列首页</span>
+	</a>
+
+	<!-- 章节列表 -->
+	<nav class="flex flex-col gap-0.5">
+		{
+			chapters.map((chapter) => {
+				const isActive = chapter.slug === currentChapter;
+				return (
+					<a
+						href={getSeriesChapterUrl(seriesId, chapter.slug)}
+						class:list={[
+							"flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
+							isActive
+								? "bg-(--primary)/10 text-(--primary) font-medium"
+								: "text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5",
+						]}
+					>
+						<Icon
+							name={isActive
+								? "material-symbols:description-outline"
+								: "material-symbols:description-outline"}
+							class="text-base shrink-0"
+						/>
+						<span class="truncate">{chapter.title}</span>
+					</a>
+				);
+			})
+		}
+	</nav>
+
+	{
+		chapters.length === 0 && (
+			<div class="text-sm text-black/40 dark:text-white/40 py-2 px-3">
+				暂无章节
+			</div>
+		)
+	}
+</div>
+
+<style>
+	.series-sidebar {
+		/* width fills parent aside */
+	}
+
+	@media (max-width: 768px) {
+		.series-sidebar {
+			min-width: 100%;
+			max-width: 100%;
+			position: static;
+			margin-bottom: 1rem;
+		}
+	}
+</style>

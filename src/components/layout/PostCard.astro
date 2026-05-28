@@ -8,6 +8,7 @@ import { siteConfig } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
 import { getApiUrlList, processCoverImageSync } from "@/utils/image-utils";
+import { isSeriesEntry } from "@/utils/series-utils";
 import { getFileDirFromPath, getTagUrl } from "@/utils/url-utils";
 
 interface Props {
@@ -63,6 +64,7 @@ const shouldClampDescription = descriptionLines > 0;
 
 const { remarkPluginFrontmatter } = await render(entry);
 const descriptionText = description || remarkPluginFrontmatter.excerpt || "";
+const isSeries = isSeriesEntry(entry.id);
 ---
 
 <div
@@ -102,6 +104,21 @@ const descriptionText = description || remarkPluginFrontmatter.excerpt || "";
             name="material-symbols:lock-outline"
             class="inline text-2xl align-middle -translate-y-px"
           />
+        )
+      }
+      {
+        isSeries && (
+          <span
+            class="inline-flex items-center px-2 py-0.5 ml-2 text-xs font-medium
+                       rounded-md align-middle -translate-y-px
+                       bg-(--primary)/10 text-(--primary)"
+          >
+            <Icon
+              name="material-symbols:folder-special-outline-rounded"
+              class="text-sm mr-0.5"
+            />
+            系列
+          </span>
         )
       }
     </a>

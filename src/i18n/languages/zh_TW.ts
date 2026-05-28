@@ -315,4 +315,12 @@ export const zh_TW: Translation = {
 	[Key.passwordSubmit]: "解鎖",
 	[Key.passwordError]: "密碼錯誤，請重試。",
 	[Key.passwordProtectedRss]: "本文已加密保護，請訪問網站查看。",
+
+	// 系列文档
+	[Key.seriesBadge]: "系列",
+	[Key.seriesBackToHome]: "返回系列首頁",
+	[Key.seriesNoChapters]: "暫無章節",
+	[Key.seriesNoContent]: "暫無可顯示的章節內容",
+	[Key.seriesPrevChapter]: "上一章",
+	[Key.seriesNextChapter]: "下一章",
 };

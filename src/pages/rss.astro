@@ -74,8 +74,8 @@ const recentPosts = posts.slice(0, 6);
                             </p>
                         )}
                         <div class="flex items-center gap-4 text-sm text-60">
-                            <time datetime={post.data.published.toISOString()} class="text-75">
-                                {formatDateToYYYYMMDD(post.data.published)}
+                            <time datetime={post.data.published!.toISOString()} class="text-75">
+                                {formatDateToYYYYMMDD(post.data.published!)}
                             </time>
                         </div>
                     </article>

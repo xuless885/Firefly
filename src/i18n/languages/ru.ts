@@ -325,4 +325,12 @@ export const ru: Translation = {
 	[Key.passwordError]: "Неверный пароль, попробуйте снова.",
 	[Key.passwordProtectedRss]:
 		"Эта статья зашифрована. Пожалуйста, посетите сайт для просмотра.",
+
+	// Серия
+	[Key.seriesBadge]: "Серия",
+	[Key.seriesBackToHome]: "Назад к серии",
+	[Key.seriesNoChapters]: "Нет глав",
+	[Key.seriesNoContent]: "Нет содержимого",
+	[Key.seriesPrevChapter]: "Предыдущая",
+	[Key.seriesNextChapter]: "Следующая",
 };

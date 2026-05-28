@@ -39,8 +39,10 @@ import { remarkImageGrid } from "./src/plugins/remark-image-grid.js";
 import { plantumlConfig } from "./src/config";
 import { remarkObsidianHighlight } from "./src/plugins/remark-obsidian-highlight.js";
 import { remarkObsidianComments } from "./src/plugins/remark-obsidian-comments.js";
+import { remarkObsidianEmbeds } from "./src/plugins/remark-obsidian-embeds.js";
 import remarkGfm from "remark-gfm";
 import wikiLinkPlugin from "@portaljs/remark-wiki-link";
+import seriesSync from "./src/integrations/series-sync";
 
 if (process.env.NODE_ENV === "development") {
 	setMaxListeners(20);
@@ -67,6 +69,7 @@ export default defineConfig({
 	},
 
 	integrations: [
+		seriesSync(),
 		swup({
 			theme: false,
 			animationClass: "transition-swup-", // see https://swup.js.org/options/#animationselector
@@ -200,6 +203,7 @@ export default defineConfig({
 		remarkPlugins: [
 			remarkObsidianComments,
 			remarkObsidianHighlight,
+			remarkObsidianEmbeds,
 			remarkGfm,
 			[
 				wikiLinkPlugin,

@@ -50,7 +50,7 @@ const { remarkPluginFrontmatter } = await render(entry);
 
 const bannerPostMeta = {
 	title: entry.data.title,
-	published: entry.data.published,
+	published: entry.data.published!,
 	updated: entry.data.updated,
 	words: remarkPluginFrontmatter.words,
 	minutes: remarkPluginFrontmatter.minutes,
@@ -70,7 +70,7 @@ if (processedImage) {
 	);
 	if (isLocal) {
 		const basePath = getFileDirFromPath(entry.filePath || "");
-		const files = import.meta.glob<ImageMetadata>("../../**", {
+		const files = import.meta.glob<ImageMetadata>("../../**/*.{png,jpg,jpeg,webp,avif,gif,svg}", {
 			import: "default",
 		});
 		let normalizedPath = path
@@ -94,7 +94,7 @@ if (posterAvatarUrl) {
 		posterAvatarUrl.startsWith("data:")
 	);
 	if (isLocalAvatar) {
-		const files = import.meta.glob<ImageMetadata>("../../**", {
+		const files = import.meta.glob<ImageMetadata>("../../**/*.{png,jpg,jpeg,webp,avif,gif,svg}", {
 			import: "default",
 		});
 		const normalizedPath = path
@@ -121,7 +121,7 @@ const jsonLd = {
 		name: profileConfig.name,
 		url: Astro.site,
 	},
-	datePublished: formatDateToYYYYMMDD(entry.data.published),
+	datePublished: formatDateToYYYYMMDD(entry.data.published!),
 	inLanguage: entry.data.lang
 		? entry.data.lang.replace("_", "-")
 		: siteConfig.lang.replace("_", "-"),
@@ -228,7 +228,7 @@ const relatedPosts = await getRelatedPosts(entry, 5);
       <div class="onload-animation">
         <PostMetadata
           className="mb-5"
-          published={entry.data.published}
+          published={entry.data.published!}
           updated={entry.data.updated}
           tags={entry.data.tags}
           category={entry.data.category || undefined}
@@ -305,7 +305,7 @@ const relatedPosts = await getRelatedPosts(entry, 5);
                             title={entry.data.title}
                             author={profileConfig.name}
                             description={entry.data.description || entry.data.title}
-                            pubDate={formatDateToYYYYMMDD(entry.data.published)}
+                            pubDate={formatDateToYYYYMMDD(entry.data.published!)}
                             coverImage={posterCoverUrl}
                             url={Astro.url.href}
                             siteTitle={siteConfig.title}
@@ -336,7 +336,7 @@ const relatedPosts = await getRelatedPosts(entry, 5);
               <License
                 title={entry.data.title}
                 id={entry.id}
-                pubDate={entry.data.published}
+                pubDate={entry.data.published!}
                 author={entry.data.author}
                 sourceLink={entry.data.sourceLink}
                 licenseName={entry.data.licenseName}
@@ -393,7 +393,7 @@ const relatedPosts = await getRelatedPosts(entry, 5);
                             title={entry.data.title}
                             author={profileConfig.name}
                             description={entry.data.description || entry.data.title}
-                            pubDate={formatDateToYYYYMMDD(entry.data.published)}
+                            pubDate={formatDateToYYYYMMDD(entry.data.published!)}
                             coverImage={posterCoverUrl}
                             url={Astro.url.href}
                             siteTitle={siteConfig.title}
@@ -424,7 +424,7 @@ const relatedPosts = await getRelatedPosts(entry, 5);
               <License
                 title={entry.data.title}
                 id={entry.id}
-                pubDate={entry.data.published}
+                pubDate={entry.data.published!}
                 author={entry.data.author}
                 sourceLink={entry.data.sourceLink}
                 licenseName={entry.data.licenseName}
@@ -441,7 +441,7 @@ const relatedPosts = await getRelatedPosts(entry, 5);
   <!-- 上次编辑时间 -->
   {
     siteConfig.showLastModified && (() => {
-      const lastModified = dayjs(entry.data.updated || entry.data.published);
+      const lastModified = dayjs(entry.data.updated || entry.data.published!);
       const dateStr = lastModified.format("YYYY-MM-DD");
       const outdatedThreshold = siteConfig.outdatedThreshold ?? 1;
 

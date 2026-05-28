@@ -1,0 +1,8 @@
+# Sample series config - no default chapter, shows index.md as landing page
+# To set a default chapter, uncomment and change:
+# defaultChapter: "01-第一阶段"
+# To sync chapters from external directory:
+# sync:
+#   source: "D:/path/to/chapters/"
+
+defaultChapter: null

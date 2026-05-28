@@ -52,11 +52,11 @@ function formatNumber(num: number): string {
 // 获取最新文章日期（用于客户端计算）
 const latestPost = posts.reduce((latest, post) => {
 	if (!latest) return post;
-	return post.data.published > latest.data.published ? post : latest;
+	return post.data.published! > latest.data.published! ? post : latest;
 }, posts[0]);
 
 const lastPostDate = latestPost
-	? latestPost.data.published.toISOString()
+	? latestPost.data.published!.toISOString()
 	: null;
 
 const todayText = i18n(I18nKey.today);

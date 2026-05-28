@@ -1,0 +1,328 @@
+---
+import fs from "node:fs";
+import path from "node:path";
+import { getCollection, render } from "astro:content";
+import { Icon } from "astro-icon/components";
+import SeriesSidebar from "@/components/features/SeriesSidebar.astro";
+import KatexManager from "@/components/features/KatexManager.astro";
+import Announcement from "@/components/widget/Announcement.astro";
+import Music from "@/components/widget/Music.astro";
+import Markdown from "@/components/common/Markdown.astro";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import {
+	getSeriesChapters,
+	resolveChapter,
+	getChapterNav,
+} from "@/utils/series-utils";
+import { getSeriesChapterUrl } from "@/utils/url-utils";
+
+// ---------------------------------------------------------------------------
+// getStaticPaths
+// ---------------------------------------------------------------------------
+
+export async function getStaticPaths() {
+	const SERIES_ROOT = path.join(
+		process.cwd(),
+		"src",
+		"content",
+		"posts",
+		"Sets_of_doc",
+	);
+
+	const paths: {
+		params: { slug: string };
+		props: { seriesId: string; chapterSlug?: string };
+	}[] = [];
+
+	if (!fs.existsSync(SERIES_ROOT)) return paths;
+
+	const seriesFolders = fs
+		.readdirSync(SERIES_ROOT, { withFileTypes: true })
+		.filter((d) => d.isDirectory())
+		.map((d) => d.name);
+
+	for (const seriesId of seriesFolders) {
+		paths.push({
+			params: { slug: seriesId },
+			props: { seriesId },
+		});
+
+		const chapters = getSeriesChapters(seriesId);
+		for (const chapter of chapters) {
+			const chapterSlug = `${seriesId}/${chapter.slug}`;
+			paths.push({
+				params: { slug: chapterSlug },
+				props: { seriesId, chapterSlug: chapter.slug },
+			});
+		}
+	}
+
+	return paths;
+}
+
+// ---------------------------------------------------------------------------
+// Page component
+// ---------------------------------------------------------------------------
+
+const SERIES_ROOT = path.join(
+	process.cwd(),
+	"src",
+	"content",
+	"posts",
+	"Sets_of_doc",
+);
+
+const POSTS_ROOT = path.join(
+	process.cwd(),
+	"src",
+	"content",
+	"posts",
+);
+
+const { slug } = Astro.params;
+const { seriesId, chapterSlug: requestedChapter } = Astro.props;
+
+const chapters = getSeriesChapters(seriesId);
+
+let activeChapter: string | undefined = requestedChapter;
+if (!activeChapter && slug) {
+	const parts = slug.split("/");
+	if (parts.length > 1) {
+		activeChapter = parts.slice(1).join("/");
+	}
+}
+
+const resolved = resolveChapter(seriesId, activeChapter);
+const nav = activeChapter
+	? getChapterNav(chapters, activeChapter)
+	: { prev: null, next: null };
+
+// Load chapter through Astro content pipeline (gets remark/rehype processing)
+let Content: Awaited<ReturnType<typeof render>>["Content"] | null = null;
+let chapterTitle = seriesId;
+
+// Helper: normalize a path segment the same way the glob loader does
+function normalizeId(seg: string): string {
+	return seg
+		.toLowerCase()
+		.replace(/\s+/g, "-")      // spaces → hyphens
+		.replace(/[()（）]/g, "")   // strip parentheses
+		.replace(/-+/g, "-")        // collapse multiple hyphens
+		.replace(/^-|-$/g, "");     // trim leading/trailing hyphens
+}
+
+if (!activeChapter) {
+	// Series root — load index.md as landing page
+	// Note: glob loader strips "/index" from index.md IDs:
+	//   "Sets_of_doc/sample-series/index.md" → ID is "sets_of_doc/sample-series"
+	const allPosts = await getCollection("posts");
+	const indexId = `sets_of_doc/${normalizeId(seriesId)}`;
+	const indexEntry = allPosts.find((e) => e.id.toLowerCase().replace(/\\/g, "/") === indexId);
+	if (indexEntry) {
+		const rendered = await render(indexEntry);
+		Content = rendered.Content;
+		chapterTitle = indexEntry.data.title || seriesId;
+	}
+} else if (resolved) {
+	// Chapter page — build normalized ID matching glob-loader's format
+	// Glob loader normalizes: lowercase, spaces→hyghens, strip ()（）, etc.
+	const rawId = path
+		.relative(POSTS_ROOT, resolved.filePath)
+		.replace(/\\/g, "/")
+		.replace(/\.(md|mdx)$/i, "");
+	const parts = rawId.split("/");
+	const normalizedId = parts.map((p, i) =>
+		i === parts.length - 1 ? normalizeId(p) : p.toLowerCase().replace(/\s+/g, "-"),
+	).join("/");
+
+	const allPostsCh = await getCollection("posts");
+	const entry = allPostsCh.filter((e) => {
+		const eId = e.id.toLowerCase().replace(/\\/g, "/");
+		return eId === normalizedId;
+	});
+	if (entry.length) {
+		const rendered = await render(entry[0]);
+		Content = rendered.Content;
+		chapterTitle = entry[0].data.title || seriesId;
+	}
+}
+
+const seriesTitle = chapterTitle;
+---
+
+<MainGridLayout
+  title={seriesTitle}
+  description={seriesTitle}
+>
+  <!-- KaTeX for math rendering -->
+  <KatexManager slot="head" />
+
+  <div class="series-page">
+    <div class="flex flex-col md:flex-row gap-4">
+      <!-- Sidebar: announcement (top) + chapters + music (bottom), scrolls with page -->
+      <aside class="hidden md:block md:w-64 lg:w-72 shrink-0">
+        <div class="flex flex-col gap-4">
+          <div class="shrink-0">
+            <Announcement />
+          </div>
+          <div>
+            <SeriesSidebar
+              seriesId={seriesId}
+              chapters={chapters}
+              currentChapter={activeChapter || ""}
+            />
+          </div>
+          <div class="shrink-0">
+            <Music />
+          </div>
+        </div>
+      </aside>
+
+      <!-- Mobile: collapsible sidebar -->
+      <details class="block md:hidden w-full mb-2" open>
+        <summary class="card-base p-3 font-medium text-sm cursor-pointer
+                        text-black/70 dark:text-white/70">
+          <Icon name="material-symbols:menu-open-rounded" class="inline text-lg align-middle mr-1" />
+          章节导航（{chapters.length}章）
+        </summary>
+        <div class="mt-2">
+          <SeriesSidebar
+            seriesId={seriesId}
+            chapters={chapters}
+            currentChapter={activeChapter || ""}
+          />
+        </div>
+      </details>
+
+      <!-- Main content -->
+      <div class="flex-1 min-w-0">
+        <div class="card-base p-6 md:p-9">
+          {
+            Content ? (
+              <>
+                <h1
+                  class="text-2xl md:text-3xl font-bold mb-6
+                             text-black/90 dark:text-white/90"
+                >
+                  {chapterTitle}
+                </h1>
+
+                <div class="mb-6">
+                  <Markdown>
+                    <Content />
+                  </Markdown>
+                </div>
+              </>
+            ) : (
+              <div class="flex flex-col items-center justify-center py-16 text-black/40 dark:text-white/40">
+                <Icon
+                  name="material-symbols:folder-open-outline-rounded"
+                  class="text-6xl mb-4"
+                />
+                <p class="text-lg">暂无可显示的章节内容</p>
+                {
+                  chapters.length === 0 && (
+                    <p class="text-sm mt-2">该系列下暂无章节文件</p>
+                  )
+                }
+              </div>
+            )
+          }
+        </div>
+
+        <!-- Prev/Next navigation -->
+        {
+          (nav.prev || nav.next) && (
+            <div class="flex flex-col md:flex-row justify-between gap-4 mt-4">
+              {
+                nav.prev ? (
+                  <a
+                    href={getSeriesChapterUrl(seriesId, nav.prev.slug)}
+                    class="btn-card flex-1 rounded-2xl h-15 px-4 flex items-center gap-4
+                               font-bold text-black/75 dark:text-white/75
+                               hover:text-(--primary) active:scale-95 transition-all"
+                  >
+                    <Icon
+                      name="material-symbols:chevron-left-rounded"
+                      class="text-[2rem] text-(--primary)"
+                    />
+                    <span class="truncate">{nav.prev.title}</span>
+                  </a>
+                ) : (
+                  <div class="flex-1" />
+                )
+              }
+              {
+                nav.next ? (
+                  <a
+                    href={getSeriesChapterUrl(seriesId, nav.next.slug)}
+                    class="btn-card flex-1 rounded-2xl h-15 px-4 flex items-center justify-end gap-4
+                               font-bold text-black/75 dark:text-white/75
+                               hover:text-(--primary) active:scale-95 transition-all"
+                  >
+                    <span class="truncate">{nav.next.title}</span>
+                    <Icon
+                      name="material-symbols:chevron-right-rounded"
+                      class="text-[2rem] text-(--primary)"
+                    />
+                  </a>
+                ) : (
+                  <div class="flex-1" />
+                )
+              }
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Hide regular sidebar + expand content on series pages -->
+  <!-- is:inline ensures layout is correct BEFORE first paint (not deferred) -->
+  <script is:inline>
+    (function() {
+      var sidebar = document.getElementById('left-sidebar-wrapper');
+      var grid = document.getElementById('main-grid');
+      var swup = document.getElementById('swup-container');
+      var contentWrapper = swup ? swup.parentElement : null;
+
+      // Hide left sidebar only (keep right sidebar for stats/calendar)
+      if (sidebar) sidebar.style.display = 'none';
+
+      // 2-column grid: content (1fr) + right sidebar (17.5rem)
+      // Right sidebar is hidden by CSS at <xl breakpoints, so single-col there
+      if (grid) grid.style.gridTemplateColumns = 'minmax(0, 1fr) 17.5rem';
+      if (contentWrapper) {
+        contentWrapper.style.gridColumn = '1';
+        // Remove overflow-hidden to prevent clipping card left rounded corners
+        contentWrapper.style.overflow = 'visible';
+      }
+
+      // #right-sidebar-static is rendered AFTER the slot, defer to DOMContentLoaded
+      function fixRightSidebar() {
+        var rightStatic = document.getElementById('right-sidebar-static');
+        if (rightStatic) rightStatic.style.display = ''; // keep visible
+        // The actual grid item is the child of #right-sidebar-static (contents div)
+        var rightBar = document.getElementById('right-sidebar');
+        if (rightBar) rightBar.style.gridColumn = '2';
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixRightSidebar);
+      } else {
+        fixRightSidebar();
+      }
+
+      // Restore on navigation away (Swup/Astro page transitions)
+      document.addEventListener('astro:before-swap', function() {
+        if (sidebar) sidebar.style.display = '';
+        if (grid) grid.style.gridTemplateColumns = '';
+        if (contentWrapper) {
+          contentWrapper.style.gridColumn = '';
+          contentWrapper.style.overflow = '';
+        }
+        var rightBar = document.getElementById('right-sidebar');
+        if (rightBar) rightBar.style.gridColumn = '';
+      });
+    })();
+  </script>
+</MainGridLayout>

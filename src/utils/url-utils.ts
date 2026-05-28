@@ -72,6 +72,20 @@ export function getSearchUrl(query: string): string {
 	return url(`/search/?q=${encodeURIComponent(query.trim())}`);
 }
 
+/**
+ * 系列文档 URL
+ */
+export function getSeriesUrl(seriesFolder: string): string {
+	return url(`/posts/sets_of_doc/${seriesFolder}/`);
+}
+
+export function getSeriesChapterUrl(
+	seriesFolder: string,
+	chapter: string,
+): string {
+	return url(`/posts/sets_of_doc/${seriesFolder}/${chapter}/`);
+}
+
 export function url(path: string): string {
 	// 关键修复：如果是网络URL，直接返回原地址
 	if (

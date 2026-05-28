@@ -1,0 +1,5 @@
+# DSE Textbook Plan 配置
+sync:
+  source: "C:/Users/xuless/OneDrive/Xuless Obsidian Note/HKDSE course/DSE Textbook Plan"
+
+defaultChapter: "Ch00 基础概念"
