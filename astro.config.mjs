@@ -37,6 +37,10 @@ import rehypeExternalLinks from "./src/plugins/rehype-external-links.mjs";
 import rehypeFigure from "./src/plugins/rehype-figure.mjs";
 import { remarkImageGrid } from "./src/plugins/remark-image-grid.js";
 import { plantumlConfig } from "./src/config";
+import { remarkObsidianHighlight } from "./src/plugins/remark-obsidian-highlight.js";
+import { remarkObsidianComments } from "./src/plugins/remark-obsidian-comments.js";
+import remarkGfm from "remark-gfm";
+import wikiLinkPlugin from "@portaljs/remark-wiki-link";
 
 if (process.env.NODE_ENV === "development") {
 	setMaxListeners(20);
@@ -194,6 +198,20 @@ export default defineConfig({
 	],
 	markdown: {
 		remarkPlugins: [
+			remarkObsidianComments,
+			remarkObsidianHighlight,
+			remarkGfm,
+			[
+				wikiLinkPlugin,
+				{
+					pathFormat: "obsidian-short",
+					permalinks: [],
+					wikiLinkClassName: "wiki-link",
+					hrefTemplate: (permalink) =>
+						`/posts/${permalink.toLowerCase().replace(/\s+/g, "-")}/`,
+					aliasDivider: "|",
+				},
+			],
 			remarkMath,
 			remarkReadingTime,
 			remarkImageGrid,
