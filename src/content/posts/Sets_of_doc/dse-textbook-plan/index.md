@@ -16,6 +16,10 @@ draft: false
 
 ---
 
+## 项目源网站
+
+该项目的所有文档都在Obsidian平台上编写的，本人也使用了Obsidian官方提供的发布服务，具体可以浏览网页链接: [Xuless Obsidian DSE Notes](https://publish.obsidian.md/xulessdsenote/)
+
 ## 注意事项
 
 > 这**不是**一个详细且正式的 DSE 知识文档。
